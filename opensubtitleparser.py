@@ -22,19 +22,18 @@ def main():
     raw_data_dir = args.rootXmlDir
 
     files = findXmlFiles(raw_data_dir)
-    print "Have " + str(len(files)) + " to parse!"
+    print("Have " + str(len(files)) + " to parse!")
     #Setup folder structure and data file
     mkdir_p(processed_data_dir)
     for f in files:
         try:
             extractTokenizedPhrases(f, processed_data_dir)
         except KeyboardInterrupt:
-            print "Process stopped by user..."
+            print("Process stopped by user...")
             return 0
         except Exception as e:
-            print e
-            print "Error in " + f
-            pass
+            print("Error in " + f)
+            raise e
 
 '''
 Loops through folders recursively to find all xml files
@@ -59,16 +58,17 @@ This is for memory consideration when processing later down the pipeline
 def extractTokenizedPhrases(xmlFilePath, dataDirFilePath):
     global inc
     inc += 1
-    mkfile(dataDirFilePath + str(inc) +raw_file)
+    mkfile(dataDirFilePath + str(inc) + raw_file)
     tree = ET.parse(xmlFilePath)
     root = tree.getroot()
-    print "Processing " + xmlFilePath + "..."
+    print("Processing " + xmlFilePath + "...")
     for child in root.findall('s'):
         A = []
         for node in child.getiterator():
             if node.tag == 'w':
-                    A.append(node.text.encode('ascii', 'ignore').replace('-', ''))
+                A.append(node.text.replace('-', ''))
         text = " ".join(A)
+
         text = cleanText(text)
         try:
             if text[0] != '[' and text[-1] != ':':
@@ -112,7 +112,7 @@ def mkfile(path):
         with open(path, 'w+'):
             return 1
     except IOError:
-        print "Data file open, ensure it is closed, and re-run!"
+        print("Data file open, ensure it is closed, and re-run!")
         return 0
 
 
